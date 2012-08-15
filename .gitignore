@@ -1,0 +1,4 @@
+*.log
+*.pyc
+*.swp
+raceall_api/settings.py
