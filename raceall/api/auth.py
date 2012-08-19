@@ -11,10 +11,13 @@ class RaceUsersAuth(Authorization):
 #XXX: Prob wont work yet
 class RaceTimesAuth(Authorization):
     def is_authorized(self, request, object=None):
-        body = json.loads(request.body)
-        if RaceUser.objects.get(user=request.user, race=body['race']):
-            return True
-        return False
+        return True
+
+
+        #body = json.loads(request.body)
+        #if RaceUser.objects.get(user=request.user, race=body['race']):
+        #    return True
+        #return False
 
 #if request.method == 'POST':
 #    body = json.loads(request.body)

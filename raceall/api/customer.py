@@ -7,6 +7,8 @@ from raceall.models import *
 from django.views.decorators.csrf import csrf_exempt
 from tastypie.authorization import Authorization
 from auth import *
+import json
+
 
 class FriendshipResource(ModelResource):
     users = fields.ToOneField('raceall.api.backend.AdminUserResource', 'user', full=True)
@@ -44,7 +46,12 @@ class RaceTimesResource(ModelResource):
         return object_list.filter(user=request.user)
 
     def obj_create(self, bundle, request=None, **kwargs):
-        return super(RaceTimesResource, self).obj_create(bundle, request, user=request.user)
+        body = json.loads(request.body)
+        race = Race.objects.get(id=body['race'])
+        return super(RaceTimesResource, self).obj_create(bundle, 
+                                                         request, 
+                                                         user=request.user,
+                                                         race=race)
 
 class RaceUsersResource(ModelResource):
     users = fields.ToOneField('raceall.api.backend.AdminUserResource', 'user', full=True)
@@ -63,7 +70,14 @@ class RaceUsersResource(ModelResource):
         return object_list.filter(user=request.user)
 
     def obj_create(self, bundle, request=None, **kwargs):
-        return super(RaceUsersResource, self).obj_create(bundle, request, user=request.user)
+        body = json.loads(request.body)
+        race = Race.objects.get(id=body['race'])
+        return super(RaceUsersResource, self).obj_create(bundle,
+                                                         request,
+                                                         user=request.user,
+                                                         race=race)
+
+        
 
 class RaceResource(ModelResource):
     racer = fields.ToManyField(RaceUsersResource, 'users', full=True)

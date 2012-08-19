@@ -37,42 +37,33 @@ class QueueResourceTest(ResourceTestCase):
                           private=False)
         self.race1.save()
 
-        self.friend0 = Friendship()
+        #Create friendships
+        self.friend0 = Friendship(friend=self.user0,user=self.user1)
         self.friend0.save()
-        self.friend0.user.add(self.user0)
-        self.friend0.friend.add(self.user1)
+        self.friend0 = Friendship(friend=self.user1,user=self.user0)
         self.friend0.save()
-
-        self.test = RaceUsers()
-        self.test.save()
-        self.test.racer.add(self.user0)
-        self.test.race.add(self.race0)
-        self.test.save()
-
-        print self.test.racer
-
-
-        self.post_data = {'owner':'/api/customer/user/{0}/'.format(self.user0.pk),
-                          'name':'NAME',
-                          'vehicle':'VEHICLE',
-                          'private':False}
-
-
 
     def get_credentials(self):
         return self.create_basic(username=self.username, password=self.password)
 
-    #def test_one(self):
-    #    self.assertHttpUnauthorized(self.api_client.get('/api/customer/race/', format='json'))
+    def test_add_user_to_race(self):
+        post_data = {'race':self.race0.pk}
 
-    def test_post1(self):
-        pass
-        #print Race.objects.count()
-        #self.assertHttpCreated(self.api_client.post('/api/customer/race/',
-        #                                            format='json',
-        #                                            data=self.post_data,
-        #                                            authentication=self.get_credentials()))
-        #print Race.objects.count()
+        self.assertHttpCreated(self.api_client.post('/api/customer/users/',
+                                                    format='json',
+                                                    data=post_data,
+                                                    authentication=self.get_credentials()))
+    def test_add_time_to_race(self):
+        post_data = {'race':self.race0.pk,
+                     'time':12.45}
+
+        print post_data
+
+        self.assertHttpCreated(self.api_client.post('/api/customer/times/',
+                                                    format='json',
+                                                    data=post_data,
+                                                    authentication=self.get_credentials()))
+
 
     #def test_post2(self):
     #    print Friendship.objects.count()
