@@ -7,7 +7,6 @@ from tastypie.api import Api
 admin.autodiscover()
 customer_api = Api(api_name='customer')
 customer_api.register(FriendshipResource())
-customer_api.register(FriendshipResource())
 customer_api.register(RaceResource())
 customer_api.register(RaceUsersResource())
 customer_api.register(RaceTimesResource())

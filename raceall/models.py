@@ -30,9 +30,9 @@ class RaceTime(models.Model):
         return str(self.id)
 
 class RaceUser(models.Model):
-    user = models.ForeignKey(User)
-    race = models.ForeignKey('Race')
-    time = models.ManyToManyField(RaceTime, blank=True)
+    user = models.ForeignKey(User, related_name='user+')
+    race = models.ForeignKey('Race', related_name='race+')
+    times = models.ManyToManyField(RaceTime, related_name='times')
 
     class Meta:
         unique_together = (("user", "race"),)

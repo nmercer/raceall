@@ -30,7 +30,19 @@ class FriendshipResource(ModelResource):
                     friends.append(friend)
             return friends
 
-        return object_list.filter(owner=request.user)
+        return object_list.filter(user=request.user)
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        body = json.loads(request.body)
+        friend = User.objects.get(id=body['friend'])
+
+        return super(FriendshipResource, self).obj_create(bundle,
+                                                          request,
+                                                          user=request.user,
+                                                          friend=friend)
+
+
+    
 
 class RaceTimesResource(ModelResource):
     class Meta:
@@ -54,8 +66,8 @@ class RaceTimesResource(ModelResource):
                                                          race=race)
 
 class RaceUsersResource(ModelResource):
+    times = fields.ToManyField(RaceTimesResource, 'times', full=True)
     users = fields.ToOneField('raceall.api.backend.AdminUserResource', 'user', full=True)
-    times = fields.ToManyField(RaceTimesResource, 'time', full=True)
 
     class Meta:
         queryset = RaceUser.objects.all()
@@ -72,6 +84,8 @@ class RaceUsersResource(ModelResource):
     def obj_create(self, bundle, request=None, **kwargs):
         body = json.loads(request.body)
         race = Race.objects.get(id=body['race'])
+        
+        #time = RaceTime.objects.get(id=body['times'])
         return super(RaceUsersResource, self).obj_create(bundle,
                                                          request,
                                                          user=request.user,

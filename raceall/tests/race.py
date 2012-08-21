@@ -43,8 +43,18 @@ class QueueResourceTest(ResourceTestCase):
         self.friend0 = Friendship(friend=self.user1,user=self.user0)
         self.friend0.save()
 
+        self.racetime0 = RaceTime(time='123.4', user=self.user0, race=self.race0)
+        self.racetime0.save()
+
     def get_credentials(self):
         return self.create_basic(username=self.username, password=self.password)
+
+    def test_add_user_to_race_unauthorzied(self):
+        post_data = {'race':self.race0.pk}
+        self.assertHttpUnauthorized(self.api_client.post('/api/customer/users/',
+                                                    format='json',
+                                                    data=post_data))
+
 
     def test_add_user_to_race(self):
         post_data = {'race':self.race0.pk}
@@ -53,109 +63,36 @@ class QueueResourceTest(ResourceTestCase):
                                                     format='json',
                                                     data=post_data,
                                                     authentication=self.get_credentials()))
-    def test_add_time_to_race(self):
+
+    def test_add_time_to_race_unauthorzied(self):
         post_data = {'race':self.race0.pk,
                      'time':12.45}
 
-        print post_data
+        self.assertHttpUnauthorized(self.api_client.post('/api/customer/times/',
+                                                         format='json',
+                                                         data=post_data))
+
+    def test_add_time_to_race(self):
+        post_data = {'race':self.race0.pk,
+                     'time':12.45}
 
         self.assertHttpCreated(self.api_client.post('/api/customer/times/',
                                                     format='json',
                                                     data=post_data,
                                                     authentication=self.get_credentials()))
 
+    def test_add_friendship(self):
+        self.friend0.delete()
+        post_data = {'friend':self.user1.pk}
 
-    #def test_post2(self):
-    #    print Friendship.objects.count()
-    #    print '/api/customer/friends/{0}/'.format(self.friend0.id)
-    #    self.assertHttpAccepted(self.api_client.delete('/api/customer/friends/{0}/'.format(self.friend0.id),
-    #                                                   format='json',
-    #                                                   authentication=self.get_credentials()))
-    #    print Friendship.objects.count()
-
-
-    #def test_get_queue(self):
-    #    resp = self.api_client.get('/api/customer/race/',
-    #                               format='json', 
-    #                               authentication=self.get_credentials())
-    #    self.assertValidJSONResponse(resp)
-
-    #def test2_post1(self):
-    #    self.post_data = {'racer':'/api/customer/user/{0}/'.format(self.user1.pk),
-    #                      'race':'/api/customer/race/{0}/'.format(self.user0.pk)}
-
-    #    self.assertHttpCreated(self.api_client.post('/api/customer/users/',
-    #                                                format='json',
-    #                                                data=self.post_data,
-    #                                                authentication=self.get_credentials()))
-
-
-
-    '''
-    def test_get_queue_unauthorzied(self):
-        self.assertHttpUnauthorized(self.api_client.get('/api/singleplats/queue/', format='json'))
-
-    def test_get_queue(self):
-        resp = self.api_client.get('/api/singleplats/queue/',
-                                   format='json', 
-                                   authentication=self.get_credentials())
-        self.assertValidJSONResponse(resp)
-        self.assertEqual(len(self.deserialize(resp)['objects'][0]), 5)
-
-    def test_post_queue_unauthorzied(self):
-        self.assertHttpUnauthorized(self.api_client.post('/api/singleplats/queue/', 
-                                                         format='json',
-                                                         data=self.post_data))
-
-    def test_post_queue(self):
-        self.assertEqual(Queue.objects.count(), 1)
-        self.assertHttpCreated(self.api_client.post('/api/singleplats/queue/',
-                                                    format='json', 
-                                                    data=self.post_data, 
+        self.assertHttpCreated(self.api_client.post('/api/customer/friends/',
+                                                    format='json',
+                                                    data=post_data,
                                                     authentication=self.get_credentials()))
-        self.assertEqual(Queue.objects.count(), 2)
 
-
-    def test_put_queue_unauthorzied(self):
-        self.assertHttpUnauthorized(self.api_client.put('/api/singleplats/queue/{0}/'.format(self.queue.pk),
-                                                         format='json',
-                                                         data=self.put_data))
-
-    def test_put_queue_when_at_max_rentals(self):
-        self.queue.rented = True
-        self.queue.save()
-        self.queue2 = Queue(user=self.user, record=self.record2, rented=True)
-        self.queue2.save()
-
-        self.assertHttpUnauthorized(self.api_client.put('/api/singleplats/queue/{0}/'.format(self.queue.pk),
-                                                        format='json',
-                                                        data=self.put_data,
-                                                        authentication=self.get_credentials()))
-
-    def test_put_queue(self):
-        self.assertEqual(Queue.objects.count(), 1)
-        self.assertHttpAccepted(self.api_client.put('/api/singleplats/queue/{0}/'.format(self.queue.pk),
-                                                    format='json', 
-                                                    data=self.put_data, 
-                                                    authentication=self.get_credentials()))
-        self.assertEqual(Queue.objects.count(), 1)
-        self.assertEqual(Queue.objects.get(pk=self.queue.pk).rented, True)
-
-
-    def test_delete_queue_unauthorzied(self):
-        self.assertHttpUnauthorized(self.api_client.delete('/api/singleplats/queue/{0}/'.format(self.queue.pk),
-                                                           format='json'))
-    def test_delete_queue_when_rented(self):
-        self.queue.rented = True
-        self.queue.save()
-        self.assertHttpUnauthorized(self.api_client.delete('/api/singleplats/queue/{0}/'.format(self.queue.pk),
-                                                       format='json', 
+    def test_remove_friendship(self):
+        print '$$$$$$$'
+        print self.friend0.pk
+        self.assertHttpAccepted(self.api_client.delete('/api/customer/friends/12/',
+                                                       format='json',
                                                        authentication=self.get_credentials()))
-
-    def test_delete_queue(self):
-        self.assertEqual(Queue.objects.count(), 1)
-        self.assertHttpAccepted(self.api_client.delete('/api/singleplats/queue/{0}/'.format(self.queue.pk),
-                                                       format='json', 
-                                                       authentication=self.get_credentials()))
-        self.assertEqual(Queue.objects.count(), 0)
-    '''
